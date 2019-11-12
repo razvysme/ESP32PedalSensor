@@ -1,11 +1,6 @@
-
 /*To Do
  * - Sleep modes (radio off, deep sleep)
- * - Send IMU Data
- * - Read/Write from EPROM
- * - Change name dinamically (WIFi or Bluetooth)
- * - Log on EPROM 
- * - Connect BT to Unity
+ * - Connect BT to Unity tomorow
  */
 
 #include <MPU9250_asukiaaa.h>
@@ -14,6 +9,7 @@
 #include <OSCMessage.h>
 #include "BluetoothSerial.h"
 #include <TimeLib.h>
+#include <EEPROM.h>
 //#include <Ethernet.h>
 
 #ifdef _ESP32_HAL_I2C_H_
@@ -25,8 +21,6 @@
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
-//define the IMU Sensor instance
-MPU9250_asukiaaa imu(MPU9250_ADDRESS_AD0_HIGH); //version 1.5
 
 
 //Networking
@@ -35,14 +29,20 @@ BluetoothSerial SerialBT; //Object for Bluetooth
 
 //Variables
 int prevDisplay = 0; //untility variable for displaying time, will be obsolete
-float accel[3]; // store accelerometer data, X Y Z
-float gyro[3];  //store gyro data, X Y Z
-String message = " "; //string to send over BT
+float accel[3]; //stores accelerometer data, X Y Z
+float gyro[3];  //stores gyro data, X Y Z
+String message = ""; //complete message to send over BT
+String name = ""; //Name of the BT device, to be stored/retreived from EEPROM
+String serialInput = ""; //store commands received over BT Serial
+int ledState = LOW; // ledState used to set the LED
+unsigned long previousMillis = 0; // will store last time LED was update
 
+//define the IMU Sensor
+MPU9250_asukiaaa imu(MPU9250_ADDRESS_AD0_HIGH); //version 1.5
 
 void setup() {
   Serial.begin(115200);
-
+  EEPROM.begin(512);
   //initalize the IMU I2C connection
   #ifdef _ESP32_HAL_I2C_H_
   // for esp32
@@ -53,15 +53,15 @@ void setup() {
 
   //wifi mode selection
   WiFi.mode(WIFI_OFF); //disable wifi. To enable use "WIFI_MODE_STA" as argument
-
-  SerialBT.begin("ESP_Pedal_Sensor"); //Name of the BT Device
+  name = "Pedal_Sensor_" + readFromEEPROM(10);
+  SerialBT.begin(name); //Name of the BT Device
   Serial.println("Bluetooth Device is Ready to Pair"); 
 
   //Start IMU reading   
   imu.setWire(&Wire);  
   imu.beginAccel();
   imu.beginGyro();
-  imu.beginMag();
+  //imu.beginMag(); //magnetometer not in use for now
 
   //set current time
   setTime(11,25,30,12,11,2019);
@@ -72,7 +72,9 @@ void loop(){
       SerialBT.write(Serial.read());
     }
     if (SerialBT.available()) {
-      Serial.write(SerialBT.read());
+      serialInput = SerialBT.readStringUntil('\n');
+      Serial.println(serialInput);
+      configureOverBT();
     }
     delay(20);
 
@@ -86,35 +88,24 @@ void loop(){
 
  // digital clock display of the time
 void digitalClockDisplay() {
-  //Serial.print(hour());
   message = hour();
   printDigits(minute());
   printDigits(second());
-  //Serial.print(" ");
   message += " ";
- //Serial.print(day());
   message += day();
-  //Serial.print(" ");
   message += "-";
-  //Serial.print(month());
   message += month();
-  //Serial.print(" ");
   message += "-";
-  //Serial.print(year());
   message += year();
-  //Serial.println();
 }
 
  // utility function for digital clock display: prints preceding colon and leading 0
 void printDigits(int digits) {
- //Serial.print(":");
  message += ':';
  if (digits < 10){
-    //Serial.print('0');
     message +=  '0';
   }
- //Serial.print(digits);
- message+= digits;
+ message += digits;
 }
 
 //update and store accel data
@@ -135,28 +126,97 @@ void updateSensor(){
 
 //utility function to print sensor data
 void printSensorData(){
-  //  Serial.print("Accel X, Y, Z: ");
    message += ", Accel: ";
   for(int i=0; i<3; ++i){
-    // Serial.print(accel[i]);
-    // Serial.print(", ");
     message += accel[i];
     message += ", ";
   }
-  // Serial.println();
-  // Serial.print("Gyro X, Y, Z: ");
   message += "Gyro: ";
   for(int i=0; i<3; ++i){
-    // Serial.print(gyro[i]);
-    // Serial.print(", ");
     message += gyro[i];
     message += ", ";
   }
-  // Serial.println();
-  // Serial.print("Acceleration Sqrt: ");
-  // Serial.println(imu.accelSqrt());
   message += "Accel Sqrt: ";
   message += imu.accelSqrt();
-  Serial.println(message);
-  SerialBT.println(message); //send message over BT
+  //Serial.println(message);
+  //SerialBT.println(message); //send message over BT
+  //Serial.println(name); 
+}
+
+//write a string to EEPROM
+void writeToEEPROM(char add, String data){
+  int _size = data.length();
+  int i;
+  for(i=0;i<_size;i++)
+  {
+    EEPROM.write(add+i,data[i]);
+  }
+  EEPROM.write(add+_size,'\0');   //Add termination null character for String Data
+  EEPROM.commit();
+}
+//read from EEPROM
+String readFromEEPROM(char add){
+  int i;
+  char data[100]; //Max 100 Bytes
+  int len=0;
+  unsigned char k;
+  k=EEPROM.read(add);
+  while(k != '\0' && len<500)   //Read until null character
+  {    
+    k=EEPROM.read(add+len);
+    data[len]=k;
+    len++;
+  }
+  data[len]='\0';
+  return String(data);
+}
+
+//function that listens and executes commands from SerialBT
+void configureOverBT(){
+  //change the Bluetooth name
+  if (serialInput.startsWith("n")){
+    serialInput.remove(0,2);
+    name = serialInput;
+    SerialBT.println("name has been changed to: " + name);
+    writeToEEPROM(10,name);
+    SerialBT.println("Sensor will restart in 3 seconds.");
+    delay(3000);
+    ESP.restart();
+  }
+  //reboot the sensor
+  else if (serialInput.startsWith("r")){
+    SerialBT.println("Sensor will restart in 3 seconds.");
+    delay(3000);
+    ESP.restart();
+  }
+  //blink 
+  else if (serialInput.startsWith("b")){
+    blink(1000);
+  }
+  //output status
+   else if (serialInput.startsWith("s")){
+    SerialBT.println(readFromEEPROM(10));
+  }
+  else
+  {
+    SerialBT.println("Unknown command. Try using n for name, r for reboot ro b for blink");
+  }
+  
+}
+//blinking function to test the sensor
+void blink(const long interval){
+  SerialBT.println("Blinking for 10 seconds");
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    // save the last time you blinked the LED
+    previousMillis = currentMillis;
+    // if the LED is off turn it on and vice-versa:
+    if (ledState == LOW) {
+      ledState = HIGH;
+    } else {
+      ledState = LOW;
+    }
+    // set the LED with the ledState of the variable:
+    digitalWrite(2, ledState);
+  }
 }
