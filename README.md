@@ -17,7 +17,7 @@ https://github.com/asukiaaa/MPU9250_asukiaaa - MPU9250 library - IMU Data
 https://github.com/PaulStoffregen/Time - Time library
 
 I am using an Android app called "Serial Bluetooth Terminal" to test the functionality.
-There are a few commands that can be sent over BT from the terminal to the device. ALl commands start with a single letter:
+There are a few commands that can be sent over BT from the terminal to the sensor. ALL commands start with a single letter:
 
 n - change the name of the BT Sensor
 
