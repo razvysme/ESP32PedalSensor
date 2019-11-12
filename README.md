@@ -8,5 +8,7 @@ This will(probably) require the removal of default WiFi library pre-installed by
 
 Libraries required for compilation:
 https://github.com/CNMAT/OSC - OSC library
+
 https://github.com/espressif/arduino-esp32 - ESP32 library(includes wifi library)
+
 https://github.com/asukiaaa/MPU9250_asukiaaa - MPU9250 library - IMU Data
