@@ -18,7 +18,12 @@ https://github.com/PaulStoffregen/Time - Time library
 
 I am using an Android app called "Serial Bluetooth Terminal" to test the functionality.
 There are a few commands that can be sent over BT from the terminal to the device. ALl commands start with a single letter:
+
 n - change the name of the BT Sensor
+
 s - sends the current status(WOP)
+
 b - blinks an LED on the sensor
+
 r - reboot in 3 seconds
+
