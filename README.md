@@ -1,5 +1,5 @@
 # ESP32PedalSensor
-A ESP32 WROOM TTGO AIO board used a sensor for biking data, build in Arduino IDE.
+A ESP32 WROOM TTGO T9 board used a sensor for biking data, build in Arduino IDE.
 
 To setup Arduino IDE for usage with the ESP32, follow the link below:
 
