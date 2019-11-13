@@ -22,11 +22,11 @@ https://github.com/PaulStoffregen/Time - Time library
 I am using an Android app called "Serial Bluetooth Terminal" to test the functionality.
 There are a few commands that can be sent over BT from the terminal to the sensor. ALL commands start with a single letter:
 
-n - change the name of the BT Sensor
+name - change the name of the BT Sensor
 
-s - sends the current status(WOP)
+status - sends the current status
 
-b - blinks an LED on the sensor
+restart - reboot in 3 seconds
 
-r - reboot in 3 seconds
+mode - change BLE to BT and vice-versa
 
