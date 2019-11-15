@@ -99,9 +99,11 @@ void setup() {
   EEPROM.get(2,deepSleepTime);
   Serial.println("DeepSleepTime retrieved succesfuly. Sleeping for: "+String(deepSleepTime));
   Serial.println(deepSleepTime);
-  //log the wakeup reason
-  printDeepSleepWakeupReason(); 
+  printDeepSleepWakeupReason(); //log the wakeup reason
 
+  // ===========================================================================
+  // Set wakeup methods
+  // ===========================================================================
   esp_deep_sleep_enable_timer_wakeup(deepSleepTime * uS_TO_S_FACTOR);
   Serial.println("Setup ESP32 to sleep for every " + String(deepSleepTime) + " Seconds");
   
@@ -122,19 +124,8 @@ void setup() {
   //esp_wifi_stop();//hardware disable disable wifi //this crashes the ESP for now
 
   name = "Pedal_Sensor_" + readFromEEPROM(10); //retreive the name for EEPROM to create a client with that name  
-
-  if((bool)EEPROM.read(1)==false){
-    Serial.println("Creating Bluetooth Classic Server");
-    createBTServer();
-  }
-  else if((bool)EEPROM.read(1)==true){
-    Serial.println("Creating BLE server");
-    createBLEServer();
-  }
-  else{
-    Serial.println("EEPROM memory read error. Default mode is BLE");
-    createBLEServer();
-  }
+  createServer();
+ 
   
   //Start IMU reading   
   imu.setWire(&Wire);  
@@ -278,13 +269,13 @@ void configureOverBT(){
     //somehow set the sleeping hours
     serialInput.remove(0,10);
     Serial.println("Sleep time is "+serialInput);
-    sleepTime = serialInput.toInt();
+    sleepTime = 60 * serialInput.substring(0,1).toInt()+serialInput.substring(3,4).toInt();
   }
   //set wake up time (for example 5:00)
   else if(serialInput.startsWith("wakeTime=")){
     serialInput.remove(0,9);
     Serial.println("Wake time is "+serialInput);
-    wakeTime = serialInput.toInt();
+    wakeTime = 60 * serialInput.substring(0,1).toInt()+serialInput.substring(3,4).toInt();
     deepSleepTime = calculateSleepTime(sleepTime, wakeTime);
     }
     //anything else
@@ -324,22 +315,42 @@ void sendToDeepSleep(){
 }
 
 void sendToLightSleep(){
+esp_light_sleep_start();
+esp_bt_controller_disable();
+}
 
+void wakeFromLightSleep(){
+  createServer();
+}
+
+void createServer(){
+   if((bool)EEPROM.read(1)==false){
+    Serial.println("Creating Bluetooth Classic Server");
+    createBTServer();
+  }
+  else if((bool)EEPROM.read(1)==true){
+    Serial.println("Creating BLE server");
+    createBLEServer();
+  }
+  else{
+    Serial.println("EEPROM memory read error. Default mode is BLE");
+    createBLEServer();
+  }
 }
 //calculates the difference betwen sleep time and wake time, in seconds - needs work(could be void instead of int)
 int calculateSleepTime(int sleepTime, int wakeTime){
   deepSleepTime = sleepTime-wakeTime;
   if (deepSleepTime<0){
     Serial.println("Deep sleep time cannot be negative. Use 24-hour system to insert the times. Defaulting to 8 hours");
-    EEPROM.put(2,8*3600);
+    EEPROM.put(2,8*60);
     EEPROM.commit();
-    return(8*3600);
+    return(8*60);
   }
-  Serial.println("Deep sleep time set to "+String(deepSleepTime*3600));
+  Serial.println("Deep sleep time set to "+String(deepSleepTime*60) + "minutes!");
   //EEPROM.put(deepSleepTime*3600);
-  EEPROM.put(2,deepSleepTime*3600);
+  EEPROM.put(2,deepSleepTime*60);
   EEPROM.commit();
-  return(deepSleepTime*3600);
+  return(deepSleepTime*60);
 }
 
 // temporary method for debugging deepSleep wakeup cause - cases not accurate.
