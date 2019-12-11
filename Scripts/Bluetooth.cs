@@ -25,8 +25,9 @@ public class Bluetooth : MonoBehaviour
 
     void Start()
     {
-        comPort = "COM" + COM;
-        GetSerialPorts();
+       //comPort = "COM" + COM;
+       GetSerialPorts();
+
 
         // if (COM >= 10)
         // {
@@ -38,8 +39,8 @@ public class Bluetooth : MonoBehaviour
         //     sp = new SerialPort(comPort, 9600, Parity.None, 8, StopBits.One); //ports higher than COM9 need to follow the syntax "\\\\.\\COM13" instead of simply "COM13".
         // }
         //
-        // sp.ReadTimeout = 500;
-        // sp.Open();
+        //sp.Open();
+        //sp.ReadTimeout = 500;
 
         //msg = sp.ReadLine();
         //Debug.Log(msg);
@@ -48,8 +49,21 @@ public class Bluetooth : MonoBehaviour
 
     void Update()
     {
-           
-    } 
+            
+        
+        //
+        //if (strm[0] == '-')
+        //{
+        //    for (int i = 0; i < strm.Length; i++)
+        //    {
+        //        Debug.Log(strm[i]);
+        //        if (i == strm.Length - 1)
+        //        {
+        //            Debug.Log(strm[i] + "\n");
+        //        }
+        //    }
+        //}
+    }  //
 
 
 
@@ -98,7 +112,7 @@ public class Bluetooth : MonoBehaviour
         msgSplit = msgAcceleration.Split(',');
         for (int i = 0; i < msgSplit.Length - 1; i++)
         {
-            Debug.Log(msgSplit[i]); //each split xyz acceleration
+            Debug.Log(msgSplit[i]); //each split
         }
     }
 
@@ -107,4 +121,29 @@ public class Bluetooth : MonoBehaviour
     {
         sp.Close();
     }
+
+    //   private void GetSerialPort()
+    //   {
+    //
+    //       try
+    //       {
+    //           ManagementObjectSearcher searcher =
+    //               new ManagementObjectSearcher("root\\CIMV2",
+    //               "SELECT * FROM Win32_PnPEntity");
+    //
+    //           foreach (ManagementObject queryObj in searcher.Get())
+    //           {
+    //               if (queryObj["Caption"].ToString().Contains("(COM"))
+    //               {
+    //                   Console.WriteLine("serial port : {0}", queryObj["Caption"]);
+    //               }
+    //
+    //           }
+    //       }
+    //       catch (ManagementException e)
+    //       {
+    //           MessageBox.Show(e.Message);
+    //       }
+    //
+    //   }
 }
