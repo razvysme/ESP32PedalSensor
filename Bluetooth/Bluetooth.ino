@@ -5,12 +5,10 @@
 // -----------------------------------------------------------------------------
 
 /*To Do
- * - Sleep modes (light sleep for day) 
- * - BLE //sort of works
  * - fix setting sleep times 
- * - Angular Velocity
- * - Connect BT to Unity tomorow
  * - Request time from Unity
+ * - Fix no-name reboot loop of death
+ * - Make Bluetooth Classic Default
  */
 
 #include <MPU9250_asukiaaa.h>
@@ -94,6 +92,7 @@ MPU9250_asukiaaa imu(MPU9250_ADDRESS_AD0_HIGH); //version 1.5
 // Setup function
 // =============================================================================
 void setup() {
+  setCpuFrequencyMhz(80); //Set CPU clock to 80MHz to reduce battery consumption
   Serial.begin(115200);
   EEPROM.begin(512);
   EEPROM.get(2,deepSleepTime);
@@ -170,21 +169,19 @@ String createMessage(){
   imu.accelUpdate();
   imu.gyroUpdate();
   String message = "";
-  message += "Accel: ";
   message += imu.accelX();
   message += ", ";
   message += imu.accelY();
   message += ", ";
   message += imu.accelZ();
-  message += ", Accel Srt: ";
-  message += imu.accelSqrt();
-  message += ", Gyro: "; 
+  message += ", ";
   message += imu.gyroX();
   message += ", ";
   message += imu.gyroY();
   message += ", ";
   message += imu.gyroZ();
   message += ", ";
+  message += imu.accelSqrt();
   return(message);
 }
 
@@ -346,7 +343,7 @@ int calculateSleepTime(int sleepTime, int wakeTime){
     EEPROM.commit();
     return(8*60);
   }
-  Serial.println("Deep sleep time set to "+String(deepSleepTime*60) + "minutes!");
+  Serial.println("Deep sleep time set to "+String(deepSleepTime*60) + "seconds!");
   //EEPROM.put(deepSleepTime*3600);
   EEPROM.put(2,deepSleepTime*60);
   EEPROM.commit();
