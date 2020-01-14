@@ -1,0 +1,43 @@
++ 5.1.2
+    - Urgent update for all platforms
++ 5.1.1
+    - Fix problem on android causing the inability to subscribe to multiple characteristics
+    - Minor changes for better performance
++ 5.1.0
+    - Add support for sending/receiving messages with custom gatt services, characteristic for BLE on UWP
++ 5.0.4
+    -Fix bug causing unity app/editor to crash on ios/macos
++ 5.0.3
+    - add read characteristic feature
++ 5.0.2
+    - MacOS and iOS not sending Data
++ 5.0.1
+    - Fixed unexpected behaviour for iOS.
++ 5.00
+    - Add support for sending/receiving messages with custom gatt services, characteristic for BLE (Android, MacOS and iOS)
+    - Fix various bugs.
+    - support for custom gatt characteristics for UWP very soon
++ 4.85
+    - Fix bug resulting problems when using the plugin across multiple scenes on Android
++ 4.8
+    - Fix bug resulting problems when using the plugin across multiple scenes
++ 4.7
+    - Fix bug affecting binary data transmission in presence of null byte.
+    - Add ReadBytes method.
++ 4.6
+    - Add IsBluetoothEnabled method for Android, iOS, MacOS to test is bluetooth is turned on.
+    - Add EnableBluetooth method for Android to turn ON/OFF bluetooth.
++ 4.5
+    - Fix bug affection iOS and MasOS : duplicate results when scanning multiple times.
++ 4.4
+    - Fix bug resulting distinct messages being concatenated affecting some Android, iOS and MacOS users.
++ 4.3.1
+    - Add fix for a bug on Android version occurring with some bluetooth modules.
++ 4.3
+    - Add support for Bluetooth Classic for UWP.
+    - Add new stream mode FixedLengthStream.
++ 4.2.6
+    - Fix (Library not imported) on MacOS.
++ 4.0
+    - isDeviceFound is now isDevicePaired.
+    - stopListening is now Disconnect.
