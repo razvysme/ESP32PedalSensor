@@ -381,6 +381,7 @@ void printDeepSleepWakeupReason(){
 void testMessaging()
 {
   SerialBT.println(createMessage());
+  SerialBT.flush();
   // Serial.println("testing serial message");
   // Serial.println(createMessage());
 }
