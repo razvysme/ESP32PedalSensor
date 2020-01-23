@@ -126,9 +126,16 @@ void setup() {
   //WiFi.mode(WIFI_OFF); //disable wifi. To enable use "WIFI_MODE_STA" as argument
   //esp_wifi_stop();//hardware disable disable wifi //this crashes the ESP for now
 
-  name = "Pedal_Sensor_" + readFromEEPROM(10); //retreive the name for EEPROM to create a client with that name  
+  // name = "Pedal_Sensor_" + readFromEEPROM(10); //retreive the name for EEPROM to create a client with that name  
+
+  if(EEPROM.read(10)==255)
+    name = "Pedal_Sensor_Default";
+  else
+  {
+    name = readFromEEPROM(10);
+  }
   createServer();
- 
+
   
   //Start IMU reading   
   imu.setWire(&Wire);  
