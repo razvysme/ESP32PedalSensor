@@ -1,3 +1,4 @@
 
 *.meta
-/Library*
+/Library/
+/Assets/BluetoothAPI/
